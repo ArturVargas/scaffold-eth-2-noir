@@ -1,16 +1,18 @@
 #!/bin/bash
 
-if ! command -v nargo &> /dev/null
-then
-    echo "nargo could not be found, exiting..."
-    echo ""
-    exit 2
+set -euo pipefail
+
+if ! command -v nargo >/dev/null 2>&1; then
+  echo "nargo could not be found"
+  exit 2
 fi
 
-echo "compiling circuits..."
-for d in circuits/*/ ; do
-  cd $d
-  pwd
-  nargo compile
-  cd ../..
+echo "Compiling Noir circuits..."
+for circuit_dir in circuits/*/; do
+  circuit_name=$(basename "$circuit_dir")
+  echo " - ${circuit_name}"
+  (
+    cd "$circuit_dir"
+    nargo compile
+  )
 done

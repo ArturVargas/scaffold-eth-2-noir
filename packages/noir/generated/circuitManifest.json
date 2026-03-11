@@ -1,0 +1,88 @@
+{
+  "LessThanSignedAge": {
+    "circuitName": "LessThanSignedAge",
+    "abi": {
+      "parameters": [
+        {
+          "name": "required_birth_year",
+          "type": {
+            "kind": "integer",
+            "sign": "unsigned",
+            "width": 16
+          },
+          "visibility": "public"
+        },
+        {
+          "name": "issuer_public_key_x",
+          "type": {
+            "kind": "array",
+            "length": 32,
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 8
+            }
+          },
+          "visibility": "public"
+        },
+        {
+          "name": "issuer_public_key_y",
+          "type": {
+            "kind": "array",
+            "length": 32,
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 8
+            }
+          },
+          "visibility": "public"
+        },
+        {
+          "name": "subject_eth_address",
+          "type": {
+            "kind": "array",
+            "length": 20,
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 8
+            }
+          },
+          "visibility": "public"
+        },
+        {
+          "name": "issuer_signed_message",
+          "type": {
+            "kind": "array",
+            "length": 64,
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 8
+            }
+          },
+          "visibility": "private"
+        },
+        {
+          "name": "subject_birth_year",
+          "type": {
+            "kind": "integer",
+            "sign": "unsigned",
+            "width": 16
+          },
+          "visibility": "private"
+        }
+      ],
+      "return_type": null,
+      "error_types": {}
+    },
+    "bytecode": "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",
+    "noirVersion": "1.0.0-beta.19+74d6be658e1ad252f87943292ba09bdd4da80bd4",
+    "backend": "bb",
+    "proofFlavor": "ultra_honk",
+    "artifactPath": "noir/circuits/LessThanSignedAge/target/LessThanSignedAge.json",
+    "verifierPath": "hardhat/contracts/verifiers/LessThanSignedAgeVerifier.sol",
+    "verifierContractName": "LessThanSignedAgeVerifier"
+  }
+}
