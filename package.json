@@ -1,6 +1,6 @@
 {
-  "name": "se-2-noir",
-  "version": "0.1.0",
+  "name": "se-2",
+  "version": "0.0.1",
   "private": true,
   "workspaces": {
     "packages": [
@@ -10,39 +10,54 @@
     ]
   },
   "scripts": {
-    "account": "yarn workspace @se-2/hardhat account",
-    "chain": "yarn workspace @se-2/hardhat chain",
-    "fork": "yarn workspace @se-2/hardhat fork",
-    "deploy": "yarn noir:export; yarn workspace @se-2/hardhat deploy",
-    "verify": "yarn workspace @se-2/hardhat verify",
-    "compile": "yarn workspace @se-2/hardhat compile",
-    "generate": "yarn workspace @se-2/hardhat generate",
+    "account": "yarn hardhat:account",
+    "account:import": "yarn workspace @se-2/hardhat account:import",
+    "account:generate": "yarn workspace @se-2/hardhat account:generate",
+    "account:reveal-pk": "yarn workspace @se-2/hardhat account:reveal-pk",
+    "chain": "yarn hardhat:chain",
+    "compile": "yarn noir:compile && yarn hardhat:compile",
+    "deploy": "yarn noir:export && yarn hardhat:deploy",
+    "fork": "yarn hardhat:fork",
+    "format": "yarn next:format && yarn hardhat:format",
+    "generate": "yarn account:generate",
+    "hardhat:account": "yarn workspace @se-2/hardhat account",
+    "hardhat:chain": "yarn workspace @se-2/hardhat chain",
+    "hardhat:check-types": "yarn workspace @se-2/hardhat check-types",
+    "hardhat:clean": "yarn workspace @se-2/hardhat clean",
+    "hardhat:compile": "yarn workspace @se-2/hardhat compile",
     "hardhat:deploy": "yarn workspace @se-2/hardhat deploy",
+    "hardhat:flatten": "yarn workspace @se-2/hardhat flatten",
+    "hardhat:fork": "yarn workspace @se-2/hardhat fork",
+    "hardhat:format": "yarn workspace @se-2/hardhat format",
+    "hardhat:generate": "yarn workspace @se-2/hardhat generate",
+    "hardhat:hardhat-verify": "yarn workspace @se-2/hardhat hardhat-verify",
     "hardhat:lint": "yarn workspace @se-2/hardhat lint",
     "hardhat:lint-staged": "yarn workspace @se-2/hardhat lint-staged",
     "hardhat:test": "yarn workspace @se-2/hardhat test",
-    "test": "yarn hardhat:test",
-    "start": "yarn workspace @se-2/nextjs dev",
-    "next:lint": "yarn workspace @se-2/nextjs lint",
-    "next:format": "yarn workspace @se-2/nextjs format",
+    "hardhat:verify": "yarn workspace @se-2/hardhat verify",
+    "lint": "yarn next:lint && yarn hardhat:lint",
+    "next:build": "yarn workspace @se-2/nextjs build",
     "next:check-types": "yarn workspace @se-2/nextjs check-types",
-    "noir:export": "yarn noir:export-json && yarn noir:export-solidity",
-    "noir:export-json": "yarn workspace @se-2/noir export-json",
-    "noir:export-solidity": "yarn workspace @se-2/noir export-solidity",
-    "noir:lint": "yarn workspace @se-2/noir lint",
-    "noir:lint-staged": "yarn workspace @se-2/noir lint-staged",
-    "postinstall": "husky install",
+    "next:format": "yarn workspace @se-2/nextjs format",
+    "next:lint": "yarn workspace @se-2/nextjs lint",
+    "next:serve": "yarn workspace @se-2/nextjs serve",
+    "noir:compile": "yarn workspace @se-2/noir compile",
+    "noir:export": "yarn workspace @se-2/noir export",
+    "noir:export-artifacts": "yarn workspace @se-2/noir export:artifacts",
+    "noir:export-verifiers": "yarn workspace @se-2/noir export:verifiers",
+    "noir:test": "yarn workspace @se-2/noir test",
+    "postinstall": "husky",
     "precommit": "lint-staged",
-    "vercel": "yarn workspace @se-2/nextjs vercel",
-    "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo"
+    "start": "yarn workspace @se-2/nextjs dev",
+    "test": "yarn noir:test && yarn hardhat:test",
+    "verify": "yarn hardhat:verify"
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {
-    "husky": "^8.0.1",
-    "lint-staged": "^13.0.3"
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10"
   },
-  "resolutions": {
-    "usehooks-ts@^2.7.2": "patch:usehooks-ts@npm:^2.7.2#./.yarn/patches/usehooks-ts-npm-2.7.2-fceffe0e43.patch"
-  },
-  "license": "MIT"
+  "engines": {
+    "node": ">=18.18.0"
+  }
 }

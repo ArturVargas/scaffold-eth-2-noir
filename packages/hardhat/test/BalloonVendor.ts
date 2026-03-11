@@ -1,45 +1,61 @@
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { ethers } from "hardhat";
-import { BalloonToken, BalloonVendor } from "../typechain-types";
-import { invalidProof, validProof } from "./constants";
+import hre, { deployments, ethers } from "hardhat";
+import { buildAgeProofInputs, signBirthYearClaim } from "../../nextjs/lib/noir/inputs";
+import { proveOnServer } from "../../nextjs/lib/noir/provingServer";
+
+const deployNoirStarterFixture = async () => {
+  await deployments.fixture(["NoirStarter"]);
+
+  const [deployer, kid, stranger] = await ethers.getSigners();
+  const balloonVendor = await hre.ethers.getContract("BalloonVendor");
+  const balloonToken = await hre.ethers.getContract("BalloonToken");
+
+  return {
+    deployer,
+    kid,
+    stranger,
+    balloonToken,
+    balloonVendor,
+  };
+};
+
+const buildProofForAddress = async (address: `0x${string}`) => {
+  const signedClaim = await signBirthYearClaim(address, 2014);
+  const inputs = buildAgeProofInputs({
+    account: address,
+    birthYear: 2014,
+    requiredBirthYear: 2013,
+    issuerPrivateKey: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+    signedClaim,
+  });
+
+  return proveOnServer({
+    circuitName: "LessThanSignedAge",
+    inputs,
+    mode: "server",
+  });
+};
 
 describe("BalloonVendor", function () {
-  let balloonVendor: BalloonVendor;
-  let balloonToken: BalloonToken;
-  let addr1: any;
-  beforeEach(async () => {
-    const signers = await ethers.getSigners();
-    addr1 = signers[1];
-    const balloonVendorFactory = await ethers.getContractFactory("BalloonVendor");
-    const balloonTokenFactory = await ethers.getContractFactory("BalloonToken");
-    const lessThanSignedAgeFactory = await ethers.getContractFactory(
-      "contracts/verifiers/LessThanSignedAge.sol:UltraVerifier",
-    );
-    balloonToken = (await balloonTokenFactory.deploy()) as BalloonToken;
-    const verifer = await lessThanSignedAgeFactory.deploy();
-    balloonVendor = (await balloonVendorFactory.deploy(balloonToken.address, verifer.address)) as BalloonVendor;
-    await balloonVendor.deployed();
-    await balloonToken.transfer(balloonVendor.address, ethers.utils.parseEther("1000"));
+  it("accepts a valid proof and transfers a token", async function () {
+    const { kid, balloonToken, balloonVendor } = await loadFixture(deployNoirStarterFixture);
+    const proof = await buildProofForAddress(kid.address as `0x${string}`);
+
+    await expect(balloonVendor.connect(kid).getFreeToken(proof.proof, proof.publicInputs))
+      .to.emit(balloonVendor, "FreeTokenClaimed")
+      .withArgs(kid.address, ethers.parseEther("1"));
+
+    expect(await balloonToken.balanceOf(kid.address)).to.equal(ethers.parseEther("1"));
+    expect(await balloonVendor.hasClaimedFreeToken(kid.address)).to.equal(true);
   });
 
-  describe("Buying tokens", function () {
-    it("should be able to buy", async function () {
-      await balloonVendor.connect(addr1).buyTokens({ value: 1 });
-      expect(await balloonToken.balanceOf(addr1.address)).to.equal(100);
-    });
-  });
-  describe("Getting tokens", function () {
-    it("should be able to get for free as a kid", async function () {
-      await balloonVendor.connect(addr1).getFreeToken(validProof);
-      expect(await balloonToken.balanceOf(addr1.address)).to.equal(1);
-    });
+  it("rejects proofs submitted by a different wallet than the one encoded in the public inputs", async function () {
+    const { kid, stranger, balloonVendor } = await loadFixture(deployNoirStarterFixture);
+    const proof = await buildProofForAddress(kid.address as `0x${string}`);
 
-    it("should not work with invalid proof", async function () {
-      try {
-        await balloonVendor.connect(addr1).getFreeToken(invalidProof);
-      } catch (e: any) {
-        expect(e.message).to.contain("PROOF_FAILURE");
-      }
-    });
+    await expect(
+      balloonVendor.connect(stranger).getFreeToken(proof.proof, proof.publicInputs),
+    ).to.be.revertedWithCustomError(balloonVendor, "InvalidPublicInputs");
   });
 });
